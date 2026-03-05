@@ -40,29 +40,33 @@ public class CardAutoTest {
 
     }
     @Test
-    void complexPath() {
+    void shouldTestComplexElements() {
         Selenide.open("http://localhost:9999");
-        SelenideElement form = $("form");
-        LocalDate targetDate = LocalDate.now().plusDays(7);
-        String day = String.valueOf(targetDate.getDayOfMonth());
-        String expectedDate = targetDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
 
-        form.$("[data-test-id='city'] input").setValue("Пс");
+        $("[data-test-id='city'] input").setValue("Пс");
         $$(".menu-item__control").find(Condition.text("Псков")).click();
 
-        form.$("[data-test-id='date'] input").click();
-        $$(".calendar__day").find(Condition.text(day)).click();
+        LocalDate targetDate = LocalDate.now().plusDays(7);
+        String day = String.valueOf(targetDate.getDayOfMonth());
 
-        form.$("[data-test-id='name'] input").setValue("Иванов Иван");
-        form.$("[data-test-id='phone'] input").setValue("+79532469696");
+        $(".input__icon").click();
+        if (!LocalDate.now().getMonth().equals(targetDate.getMonth())) {
+            $("[data-step='1']").click();
+        }
+        $$("td.calendar__day").find(Condition.text(day)).click();
 
-        form.$("[data-test-id='agreement']").click();
+        $("[data-test-id='name'] input")
+                .setValue("Иван Иванов");
+        $("[data-test-id='phone'] input")
+                .setValue("+79532469696");
+
+        $("[data-test-id='agreement']").click();
         $$("button").find(Condition.text("Забронировать")).click();
 
+        String expectedDate = targetDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         $("[data-test-id='notification']")
-                .should(Condition.text("Встреча успешно забронирована на " + expectedDate), Duration.ofSeconds(15))
-                .should(Condition.visible);
-
+                .shouldBe(Condition.visible, Duration.ofSeconds(15))
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + expectedDate));
     }
 
 }
